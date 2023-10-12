@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: '2G'
+    restart: always
+    environment:
+      - POSTGRES_DB=my_store
+      - POSTGRES_USER=yose
+      - POSTGRES_PASSWORD=admin123
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: '2G'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "root@mail.com"
+      PGADMIN_DEFAULT_PASSWORD: "root"
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+  mysql:
+    image: mariadb:10.5.8
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: '2G'
+    restart: always
+    environment:
+      - MYSQL_DATABASE=my_store
+      - MYSQL_USER=root
+      - MYSQL_ROOT_PASSWORD=admin123
+      - MYSQL_PORT=3306
+    ports:
+      - 3307:3306
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - MYSQL_ROOT_PASSWORD=admin123
+      - PMA_HOST=mysql
+      - MYSQL_USER=root
+    ports:
+      - 8080:80
