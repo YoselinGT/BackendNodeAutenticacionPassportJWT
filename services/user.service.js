@@ -1,18 +1,32 @@
 import models from '../libs/sequelize.js';
 import boom from "@hapi/boom";
+import bcrypt from "bcrypt";
 
 
 class UserService {
 
     async create(data) {
-        const newProduct = await models.models.User.create(data);
-        return newProduct;
+        const hash = await bcrypt.hash(data.password,10);
+        const newUser = await models.models.User.create({
+            ...data,
+            password: hash
+        });
+        delete newUser.dataValues.password;
+        return newUser;
     }
 
     async find() {
 
         const rta = await models.models.User.findAll({
             include: ['customer']
+        });
+        return rta;
+    }
+
+    async findByEmail(email) {
+
+        const rta = await models.models.User.findOne({
+            where: {email}
         });
         return rta;
     }
@@ -27,6 +41,7 @@ class UserService {
 
     async update(id, changes) {
         const user = await this.findOne(id);
+        console.log("user",user)
         const rta = await user.update(changes);
         return rta;
     }

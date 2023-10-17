@@ -2,6 +2,8 @@ import express from 'express';
 import CategoryService from '../services/category.service.js';
 import {validatorHandler} from "../middlewares/validator.handler.js";
 import {createCategorySchema, updateCategorySchema, getCategorySchema} from "../shemas/category.schema.js";
+import passport from "passport";
+import {checkRoles} from "../middlewares/auth.handler.js";
 
 
 const router = express.Router();
@@ -17,6 +19,8 @@ router.get('/', async (req, res, next) => {
 });
 
 router.get('/:id',
+    passport.authenticate('jwt', {session:false}),
+    checkRoles(['admin','customer']),
     validatorHandler(getCategorySchema, 'params'),
     async (req, res, next) => {
         try {
@@ -30,6 +34,8 @@ router.get('/:id',
 );
 
 router.post('/',
+    passport.authenticate('jwt', {session:false}),
+    checkRoles(['admin']),
     validatorHandler(createCategorySchema, 'body'),
     async (req, res, next) => {
         try {

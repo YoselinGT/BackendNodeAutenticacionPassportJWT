@@ -7,6 +7,8 @@ const port = 3030;
 
 app.use(express.json());
 
+import './utils/auth/index.js';
+
 routerApi(app)
 
 

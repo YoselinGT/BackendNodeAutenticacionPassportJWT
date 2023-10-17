@@ -1,11 +1,20 @@
 import models from '../libs/sequelize.js';
 import boom from "@hapi/boom";
+import bcrypt from "bcrypt";
 
 
 class CustomerService {
 
     async create(data) {
-        const newCustomer = await models.models.Customer.create(data, {
+        const hash = await bcrypt.hash(data.user.password,10);
+        const newData = {
+            ...data,
+            user: {
+                ...data.user,
+                password: hash
+            }
+        }
+        const newCustomer = await models.models.Customer.create(newData, {
             include: ['user']
         });
         return newCustomer;

@@ -5,8 +5,16 @@ import boom from "@hapi/boom";
 class OrderService {
 
     async create(data) {
-        const newOrder = await models.models.Order.create(data);
-        return newOrder;
+        const customer = await models.models.Customer.findOne({
+            where: data
+        })
+        if (customer) {
+            const customerId = customer.id;
+            const newOrder = await models.models.Order.create({customerId: customerId})
+            return newOrder;
+        } else {
+            throw boom.notFound("Customer not found");
+        }
     }
 
     async addItem(data) {
@@ -18,6 +26,22 @@ class OrderService {
 
         const rta = await models.models.Order.findAll();
         return rta;
+    }
+
+    async findByUser(userId) {
+
+        const orders = await models.models.Order.findAll({
+            where: {
+                '$customer.user.id$': userId
+            },
+            include: [
+                {
+                    association: 'customer',
+                    include: ['user']
+                }
+            ]
+        });
+        return orders;
     }
 
     async findOne(id) {

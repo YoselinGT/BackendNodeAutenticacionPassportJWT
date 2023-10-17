@@ -10,7 +10,6 @@ class CategoryService {
     }
 
     async find() {
-
         const rta = await models.models.Category.findAll();
         return rta;
     }

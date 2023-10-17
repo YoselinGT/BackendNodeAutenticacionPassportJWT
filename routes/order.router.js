@@ -2,6 +2,7 @@ import express from 'express';
 import OrderService from '../services/order.service.js';
 import {validatorHandler} from "../middlewares/validator.handler.js";
 import {createOrderSchema, updateOrderSchema, getOrderSchema, addItemShema} from "../shemas/order.schema.js";
+import passport from "passport";
 
 
 const router = express.Router();
@@ -30,11 +31,12 @@ router.get('/:id',
 );
 
 router.post('/',
-    validatorHandler(createOrderSchema, 'body'),
+    passport.authenticate('jwt', {session:false}),
+    //validatorHandler(createOrderSchema, 'body'),
     async (req, res, next) => {
         try {
-            const body = req.body;
-            const newOrder = await service.create(body);
+            const user = req.user;
+            const newOrder = await service.create({userId:user.sub});
             res.status(201).json(newOrder);
         } catch (error) {
             next(error);
