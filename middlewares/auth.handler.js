@@ -20,10 +20,8 @@ const checkAdminRole = (req, res, next) => {
 
 
 const checkRoles = (...roles) => {
-    console.log("roles",roles)
     return (req, res, next) => {
         const user = req.user;
-        console.log("user",user)
         if(roles.includes(user.role)){
             next()
         } else {

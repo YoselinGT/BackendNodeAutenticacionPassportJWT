@@ -36,33 +36,48 @@ class AuthService {
         };
     }
 
-    async sendMail(email){
-
+    async sendRecovery(email){
         const user = await service.findByEmail(email);
         if(!user) {
             throw boom.unauthorized();
         }
+
+        const payload = {
+            sub: user.id
+        }
+
+        const token = jwt.sign(payload, config.jwtsecret, {expiresIn: '15min'})
+        const link = `http://localhost/recovery?token=${token}`;
+
+        await service.update(user.id,{recoveryToken: token});
+
+        const mail = {
+            from: '"Fred Foo 👻" <yoselin.galvan.torres@gmail.com>', // sender address
+                to:`${user.email}` , // list of receivers
+            subject: "Email para recuperar contraseña", // Subject line
+            text: "Hello world?", // plain text body
+            html: `<b>Ingresa a este link => ${link}</b>`, // html body
+        }
+
+        return await this.sendMail(mail);
+    }
+
+    async sendMail(email){
+
         const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
+            host: config.hostMail,
+            port: config.portMail,
             secureConnection: false,
             auth: {
-                // TODO: replace `user` and `pass` values from <https://forwardemail.net>
-                user: "yoselin.galvan.torres@gmail.com",
-                pass: "fhnb arpk nois drbn",
+                user: config.userMail,
+                pass: config.passwordMail
             },
             tls: {
                 ciphers:'SSLv3'
             }
         });
 
-        const info = await transporter.sendMail({
-            from: '"Fred Foo 👻" <yoselin.galvan.torres@gmail.com>', // sender address
-            to:`${user.email}` , // list of receivers
-            subject: "Hello ✔", // Subject line
-            text: "Hello world?", // plain text body
-            html: "<b>Hello world?</b>", // html body
-        });
+        const info = await transporter.sendMail(email);
 
         console.log("Message sent: %s", info.messageId);
 
