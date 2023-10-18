@@ -1,10 +1,6 @@
 import express from 'express';
 import passport from 'passport';
-import jwt from 'jsonwebtoken';
 import AuthService from "../services/auth.service.js";
-
-import config from './../config/config.js'
-
 
 
 const router = express.Router();
@@ -27,6 +23,18 @@ router.post('/recovery',
         try {
             const {email} = req.body;
             const rta = await service.sendRecovery(email);
+            res.json(rta)
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+router.post('/change-password',
+    async (req, res, next) => {
+        try {
+            const { token, newPassword } = req.body;
+            const rta = await service.changePassword(token, newPassword);
             res.json(rta)
         } catch (error) {
             next(error);
